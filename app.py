@@ -166,8 +166,8 @@ import seaborn as sns
 from sklearn.preprocessing import StandardScaler, LabelEncoder
 
 # Load saved model and selected features
-model = joblib.load(r"C:\MCA\placement\digit\venv\Scripts\gradient_boosting_model.pkl")  # Adjust path if necessary
-selected_features = joblib.load(r"C:\MCA\placement\digit\venv\Scripts\selected_features.pkl")
+model = joblib.load("gradient_boosting_model.pkl")  # Adjust path if necessary
+selected_features = joblib.load("selected_features.pkl")
 
 st.title("Insurance Loss Prediction 🏦")
 st.write("Predict insurance claims using Gradient Boosting")
@@ -175,7 +175,7 @@ st.write("Predict insurance claims using Gradient Boosting")
 # Load dataset for encoding reference
 @st.cache_data
 def load_data():
-    df = pd.read_csv(r"C:\MCA\placement\digit\allstate-claims-severity\train.csv")  # Adjust path if necessary
+    df = pd.read_csv("train.csv")  # Adjust path if necessary
     df.replace([np.inf, -np.inf], np.nan, inplace=True)  # Remove infinities
     df.dropna(inplace=True)  # Remove NaNs
     return df
