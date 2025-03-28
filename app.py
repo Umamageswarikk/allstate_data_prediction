@@ -11,24 +11,42 @@ from sklearn.preprocessing import StandardScaler, LabelEncoder
 # Extract and Load CSV from ZIP
 @st.cache_data
 def load_data():
-    zip_path = "train.csv.zip"  # Ensure this is in your GitHub repo
-    extract_to = "data"  # Folder where CSV will be extracted
-    
+    zip_path = "train.csv.zip"  # Ensure this file exists in GitHub repo
+    extract_to = "data"  # Folder where we'll extract CSV
+
+    # Ensure ZIP file exists
+    if not os.path.exists(zip_path):
+        st.error("ZIP file not found! Make sure 'train.csv.zip' is in your repository.")
+        return None
+
     # Extract ZIP if not already extracted
     if not os.path.exists(extract_to):
         os.makedirs(extract_to)
         with zipfile.ZipFile(zip_path, 'r') as zip_ref:
             zip_ref.extractall(extract_to)
 
-    # Load CSV file after extraction
-    csv_path = os.path.join(extract_to, "train.csv")  # Ensure correct filename inside ZIP
+    # Debug: Show extracted files
+    extracted_files = os.listdir(extract_to)
+    st.write("Extracted files:", extracted_files)  # Debugging
+
+    # Find the CSV file inside the extracted folder
+    csv_files = [f for f in extracted_files if f.endswith(".csv")]
+    if not csv_files:
+        st.error("No CSV file found in the extracted ZIP!")
+        return None
+
+    csv_path = os.path.join(extract_to, csv_files[0])  # Use first found CSV
+    st.write(f"Using CSV file: {csv_path}")  # Debug print
+
+    # Load CSV file
     df = pd.read_csv(csv_path)
-    
     df.replace([np.inf, -np.inf], np.nan, inplace=True)  # Remove infinities
     df.dropna(inplace=True)  # Remove NaNs
     return df
 
 df = load_data()
+if df is None:
+    st.stop()  # Stop execution if data is missing
 
 # Load saved model and selected features
 model = joblib.load("gradient_boosting_model.pkl")  # Ensure this is in GitHub repo
@@ -134,4 +152,3 @@ else:
             sns.histplot(predictions, kde=True, ax=ax)
             ax.set_xlabel("Predicted Loss Amount ($)")
             st.pyplot(fig)
-
