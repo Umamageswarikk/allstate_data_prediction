@@ -8,15 +8,15 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 from sklearn.preprocessing import StandardScaler, LabelEncoder
 
-# Extract and Load CSV from ZIP
+# Extract and Load CSV from Nested Folder in ZIP
 @st.cache_data
 def load_data():
-    zip_path = "train.csv.zip"  # Ensure this file exists in GitHub repo
-    extract_to = "data"  # Folder where we'll extract CSV
+    zip_path = "train.csv.zip"  # ZIP file location
+    extract_to = "data"  # Folder where files will be extracted
 
     # Ensure ZIP file exists
     if not os.path.exists(zip_path):
-        st.error("ZIP file not found! Make sure 'train.csv.zip' is in your repository.")
+        st.error("ZIP file not found! Make sure 'train.csv.zip' is in your GitHub repository.")
         return None
 
     # Extract ZIP if not already extracted
@@ -25,17 +25,20 @@ def load_data():
         with zipfile.ZipFile(zip_path, 'r') as zip_ref:
             zip_ref.extractall(extract_to)
 
-    # Debug: Show extracted files
-    extracted_files = os.listdir(extract_to)
-    st.write("Extracted files:", extracted_files)  # Debugging
+    # Debugging: Show extracted file paths
+    extracted_files = []
+    for root, dirs, files in os.walk(extract_to):
+        for file in files:
+            extracted_files.append(os.path.join(root, file))  # Full path of extracted files
+    st.write("Extracted files:", extracted_files)  # Debugging output
 
-    # Find the CSV file inside the extracted folder
+    # Find the correct CSV file
     csv_files = [f for f in extracted_files if f.endswith(".csv")]
     if not csv_files:
-        st.error("No CSV file found in the extracted ZIP!")
+        st.error("No CSV file found in the extracted ZIP! Check filenames: " + str(extracted_files))
         return None
 
-    csv_path = os.path.join(extract_to, csv_files[0])  # Use first found CSV
+    csv_path = csv_files[0]  # Pick the first found CSV
     st.write(f"Using CSV file: {csv_path}")  # Debug print
 
     # Load CSV file
